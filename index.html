@@ -11,7 +11,7 @@
     (async () => {
       try {
         const response = await fetch('app-core.html', { cache: 'no-store' });
-        if (!response.ok) throw new Error(`app-core.html konnte nicht geladen werden (${response.status})`);
+        if (!response.ok) throw new Error('app-core.html konnte nicht geladen werden (' + response.status + ')');
 
         const html = await response.text();
         const patchScript = `<script>
@@ -27,31 +27,28 @@
               if (!document.getElementById('areaRenamePatchStyles')) {
                 const style = document.createElement('style');
                 style.id = 'areaRenamePatchStyles';
-                style.textContent = `
-                  .area-list-row {
-                    display: flex;
-                    align-items: stretch;
-                    gap: 8px;
-                  }
-
-                  .area-list-row .area-list-button {
-                    flex: 1 1 auto;
-                    min-width: 0;
-                  }
-
-                  .area-rename-button {
-                    width: 44px;
-                    min-width: 44px;
-                    min-height: 44px;
-                    border-radius: 14px;
-                    padding: 0;
-                  }
-
-                  .area-rename-button svg {
-                    width: 18px;
-                    height: 18px;
-                  }
-                `;
+                style.textContent = [
+                  '.area-list-row {',
+                  '  display: flex;',
+                  '  align-items: stretch;',
+                  '  gap: 8px;',
+                  '}',
+                  '.area-list-row .area-list-button {',
+                  '  flex: 1 1 auto;',
+                  '  min-width: 0;',
+                  '}',
+                  '.area-rename-button {',
+                  '  width: 44px;',
+                  '  min-width: 44px;',
+                  '  min-height: 44px;',
+                  '  border-radius: 14px;',
+                  '  padding: 0;',
+                  '}',
+                  '.area-rename-button svg {',
+                  '  width: 18px;',
+                  '  height: 18px;',
+                  '}'
+                ].join('\n');
                 document.head.appendChild(style);
               }
 
@@ -95,7 +92,7 @@
 
                   const button = document.createElement('button');
                   button.type = 'button';
-                  button.className = `area-list-button ${isActive ? 'is-active' : ''}`.trim();
+                  button.className = 'area-list-button' + (isActive ? ' is-active' : '');
                   button.dataset.action = 'select-area';
                   button.dataset.areaId = area.id;
                   button.disabled = isActive;
@@ -111,7 +108,7 @@
 
                   const swatch = document.createElement('span');
                   swatch.className = 'theme-option-swatch';
-                  swatch.style.background = `linear-gradient(135deg, ${theme.variables['--logo-gradient-start']} 0%, ${theme.variables['--logo-gradient-end']} 100%)`;
+                  swatch.style.background = 'linear-gradient(135deg, ' + theme.variables['--logo-gradient-start'] + ' 0%, ' + theme.variables['--logo-gradient-end'] + ' 100%)';
 
                   const themeName = document.createElement('span');
                   themeName.textContent = theme.label;
@@ -163,8 +160,8 @@
         <\/script>`;
 
         const patchedHtml = html.includes('</body>')
-          ? html.replace('</body>', `${patchScript}</body>`)
-          : `${html}${patchScript}`;
+          ? html.replace('</body>', patchScript + '</body>')
+          : html + patchScript;
 
         document.open();
         document.write(patchedHtml);
