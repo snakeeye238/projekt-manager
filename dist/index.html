@@ -98,6 +98,44 @@
       background: var(--bg-app);
     }
 
+    .mobile-top-bar,
+    .mobile-overlay,
+    .mobile-panel-close {
+      display: none;
+    }
+
+    .mobile-top-bar {
+      height: var(--mobile-topbar-height, 72px);
+      background: rgba(245, 246, 248, 0.94);
+      border-bottom: 1px solid var(--sidebar-border);
+      backdrop-filter: blur(14px);
+    }
+
+    .mobile-top-title {
+      min-width: 0;
+      color: var(--text-main);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      background: rgba(17, 23, 18, 0.34);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+
+    .mobile-overlay.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .main-grid {
       gap: 0 !important;
       grid-template-columns: 340px 1fr !important;
@@ -1387,6 +1425,204 @@
         padding: 22px 18px 24px !important;
       }
     }
+
+    @media (max-width: 900px) {
+      :root {
+        --mobile-topbar-height: 72px;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      .app-shell {
+        height: 100vh;
+        min-height: 100vh;
+        overflow: hidden;
+        padding-top: var(--mobile-topbar-height);
+      }
+
+      .mobile-top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 14px;
+      }
+
+      .mobile-top-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      #mobileLogoButton {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border-radius: 14px !important;
+      }
+
+      .mobile-action-button {
+        min-width: 46px;
+        min-height: 46px;
+        padding: 0 14px;
+        border-radius: 14px;
+      }
+
+      .mobile-action-button.is-hidden {
+        display: none;
+      }
+
+      .main-grid {
+        display: block !important;
+        height: calc(100vh - var(--mobile-topbar-height));
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .main-grid > aside.soft-card {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 40;
+        width: min(86vw, 340px);
+        max-width: 340px;
+        height: 100vh;
+        max-height: 100vh;
+        padding: 18px 16px !important;
+        border-right: 1px solid var(--sidebar-border);
+        border-bottom: 0;
+        box-shadow: 18px 0 46px rgba(15, 23, 42, 0.16);
+        transform: translateX(-104%);
+        transition: transform 0.24s ease;
+        will-change: transform;
+      }
+
+      body.is-sidebar-open .main-grid > aside.soft-card {
+        transform: translateX(0);
+      }
+
+      .mobile-panel-close {
+        display: inline-flex;
+      }
+
+      .main-content.soft-card {
+        height: 100%;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 16px 14px 18px !important;
+      }
+
+      #emptyState,
+      #dashboardView,
+      #projectView {
+        min-height: 100%;
+      }
+
+      #projectHeader {
+        margin-bottom: 14px;
+      }
+
+      #projectHeader .flex {
+        gap: 12px;
+      }
+
+      .active-project-title,
+      .active-project-title.is-long,
+      .active-project-title.is-very-long {
+        font-size: clamp(1.55rem, 8vw, 2.2rem) !important;
+        line-height: 1.08 !important;
+      }
+
+      .project-header-actions {
+        gap: 8px;
+      }
+
+      .content-grid {
+        display: block !important;
+        height: auto;
+        min-height: 0;
+      }
+
+      .content-grid > section:first-child {
+        min-height: calc(100vh - var(--mobile-topbar-height) - 118px);
+      }
+
+      #timelinePanel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        width: min(92vw, 430px);
+        max-width: 430px;
+        height: 100vh;
+        max-height: 100vh;
+        padding: 18px 16px !important;
+        border: 0;
+        border-left: 1px solid var(--sidebar-border);
+        border-radius: 0;
+        box-shadow: -18px 0 46px rgba(15, 23, 42, 0.16);
+        transform: translateX(104%);
+        transition: transform 0.24s ease;
+        will-change: transform;
+      }
+
+      body.is-timeline-open #timelinePanel {
+        transform: translateX(0);
+      }
+
+      .timeline-header {
+        align-items: flex-start !important;
+      }
+
+      .timeline-header-actions {
+        flex: 1 1 100%;
+        justify-content: stretch;
+      }
+
+      .timeline-group-switch,
+      #openJournalModalButton {
+        flex: 1 1 auto;
+      }
+
+      .timeline-group-button {
+        flex: 1 1 0;
+      }
+
+      body.is-mobile-panel-open .mobile-overlay {
+        display: block;
+      }
+
+      body.is-mobile-panel-open .main-content.soft-card {
+        overflow: hidden;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .mobile-top-bar {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .mobile-top-title {
+        font-size: 0.95rem;
+      }
+
+      .mobile-action-button {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+    }
   
     .auth-gate {
       position: fixed;
@@ -1661,8 +1897,22 @@
   </div>
 
   <div class="app-shell">
+    <div id="mobileOverlay" class="mobile-overlay" aria-hidden="true"></div>
+    <header id="mobileTopBar" class="mobile-top-bar" aria-label="Mobile Navigation">
+      <button id="mobileSidebarButton" class="soft-button button-secondary icon-button mobile-action-button" type="button" aria-label="Navigation öffnen" aria-expanded="false" aria-controls="sidebarPanel"></button>
+      <div class="mobile-top-title-wrap">
+        <button id="mobileLogoButton" class="h-12 w-12 rounded-2xl flex items-center justify-center shadow-lg shrink-0" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);" type="button" title="Versionsinfo öffnen">
+          <svg width="24" height="24" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M20 18h24a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V22a4 4 0 0 1 4-4Z" fill="none" stroke="#ffffff" stroke-width="4"/>
+            <path d="M24 31l6 6 12-14" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div id="mobileAppNameTitle" class="mobile-top-title">Projekt-Manager</div>
+      </div>
+      <button id="mobileTimelineButton" class="soft-button button-secondary mobile-action-button is-hidden" type="button" aria-label="Verlauf öffnen" aria-expanded="false" aria-controls="timelinePanel">Verlauf</button>
+    </header>
     <div class="main-grid grid grid-cols-[340px_1fr] gap-4 h-full">
-      <aside class="soft-card p-4 flex flex-col min-h-0">
+      <aside id="sidebarPanel" class="soft-card p-4 flex flex-col min-h-0">
         <div class="flex items-center justify-between gap-3 mb-5">
           <div class="flex items-center gap-3 min-w-0">
             <button id="logoButton" class="h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);" type="button" title="Versionsinfo öffnen">
@@ -1681,6 +1931,7 @@
               </div>
             </div>
           </div>
+          <button id="closeSidebarPanelButton" class="soft-button button-secondary icon-button mobile-panel-close shrink-0" type="button" aria-label="Navigation schließen">×</button>
         </div>
 
         <div class="sidebar-action-row">
@@ -1762,9 +2013,10 @@
 
             </section>
 
-            <section class="inner-card p-4 flex flex-col min-h-0">
+            <section id="timelinePanel" class="inner-card p-4 flex flex-col min-h-0">
               <div class="timeline-header flex items-center justify-between gap-3 mb-4">
                 <div class="section-title">Verlauf</div>
+                <button id="closeTimelinePanelButton" class="soft-button button-secondary icon-button mobile-panel-close shrink-0" type="button" aria-label="Verlauf schließen">×</button>
                 <div class="timeline-header-actions flex items-center gap-2">
                   <div id="timelineGroupSwitch" class="timeline-group-switch" role="radiogroup" aria-label="Verlauf gruppieren"></div>
                   <button id="openJournalModalButton" class="soft-button button-secondary" type="button">+ Eintrag</button>
@@ -1780,7 +2032,7 @@
 
   <script>
     const config = {
-      version: 'v3.47.3',
+      version: 'v3.48.3',
       appName: 'Projekt-Manager',
       defaultSubtitle: '',
       defaultAreaName: 'Standard',
@@ -2977,6 +3229,16 @@
         themeOptionList: document.getElementById('themeOptionList'),
         faviconLink: document.getElementById('faviconLink'),
         logoButton: document.getElementById('logoButton'),
+        mobileLogoButton: document.getElementById('mobileLogoButton'),
+        mobileAppNameTitle: document.getElementById('mobileAppNameTitle'),
+        mobileTopBar: document.getElementById('mobileTopBar'),
+        mobileOverlay: document.getElementById('mobileOverlay'),
+        mobileSidebarButton: document.getElementById('mobileSidebarButton'),
+        mobileTimelineButton: document.getElementById('mobileTimelineButton'),
+        closeSidebarPanelButton: document.getElementById('closeSidebarPanelButton'),
+        closeTimelinePanelButton: document.getElementById('closeTimelinePanelButton'),
+        sidebarPanel: document.getElementById('sidebarPanel'),
+        timelinePanel: document.getElementById('timelinePanel'),
         appNameTitle: document.getElementById('appNameTitle'),
         appSubtitleButton: document.getElementById('appSubtitleButton'),
         appSubtitleDisplay: document.getElementById('appSubtitleDisplay'),
@@ -3053,6 +3315,21 @@
         confirmDeleteButton: document.getElementById('confirmDeleteButton'),
       },
 
+      mobilePanelSettings: {
+        sidebar: {
+          bodyClass: 'is-sidebar-open',
+          buttonKey: 'mobileSidebarButton',
+          panelKey: 'sidebarPanel'
+        },
+        timeline: {
+          bodyClass: 'is-timeline-open',
+          buttonKey: 'mobileTimelineButton',
+          panelKey: 'timelinePanel'
+        }
+      },
+
+      mobileSwipeStart: null,
+
       modalFocusTargets: {
         versionModal: null,
         areaModal: 'newAreaInput',
@@ -3075,6 +3352,7 @@
         utils.applyIcon(this.elements.deleteProjectButton, 'trash', 'Projekt löschen');
         utils.applyIcon(this.elements.connectAutosaveButton, 'disk', 'Konto');
         utils.applyIcon(this.elements.areaSwitchButton, 'chevronDown', 'Bereich wechseln');
+        utils.applyIcon(this.elements.mobileSidebarButton, 'menu', 'Navigation öffnen');
         utils.applyIcon(this.elements.undoButton, 'undo', 'Letzten Schritt rückgängig machen');
         utils.applyIcon(this.elements.redoButton, 'redo', 'Letzten Schritt wiederherstellen');
         this.setAutosaveStatus('disconnected', 'Autosave nicht verbunden');
@@ -3085,6 +3363,7 @@
 
       setupEventListeners() {
         this.elements.logoButton.addEventListener('click', () => this.openModal('versionModal'));
+        this.elements.mobileLogoButton.addEventListener('click', () => this.openModal('versionModal'));
         this.elements.themeOptionList.addEventListener('click', event => {
           const button = event.target.closest('[data-action="select-theme"]');
           if (!button) return;
@@ -3093,6 +3372,16 @@
         this.elements.areaSwitchButton.addEventListener('click', () => this.openAreaModal());
         this.elements.openProjectModalButton.addEventListener('click', () => this.openProjectModal());
         this.elements.openDashboardButton.addEventListener('click', () => app.showDashboard());
+        this.elements.mobileSidebarButton.addEventListener('click', () => this.openMobilePanel('sidebar'));
+        this.elements.mobileTimelineButton.addEventListener('click', () => this.openMobilePanel('timeline'));
+        [this.elements.mobileOverlay, this.elements.closeSidebarPanelButton, this.elements.closeTimelinePanelButton].forEach(element => {
+          element.addEventListener('click', () => this.closeMobilePanels());
+        });
+        window.addEventListener('resize', () => {
+          if (!this.isMobileLayout()) this.closeMobilePanels();
+          this.updateMobileControls();
+        });
+        this.setupMobileSwipeListeners();
         this.elements.connectAutosaveButton.addEventListener('click', () => autosave.handleButtonClick());
         this.elements.exportButton.addEventListener('click', () => xlsxExporter.exportCurrentState());
         this.elements.loadAutosaveButton.addEventListener('click', () => autosave.loadAnother());
@@ -3128,7 +3417,10 @@
         });
 
         document.addEventListener('keydown', event => {
-          if (event.key === 'Escape') this.closeAllModals();
+          if (event.key === 'Escape') {
+            this.closeAllModals();
+            this.closeMobilePanels();
+          }
 
           const key = event.key.toLowerCase();
           const isModifierShortcut = event.ctrlKey || event.metaKey;
@@ -3483,6 +3775,132 @@
         return Boolean(target?.closest?.('input, textarea, [contenteditable="true"]'));
       },
 
+      isMobileLayout() {
+        return window.matchMedia('(max-width: 900px)').matches;
+      },
+
+      canOpenMobilePanel(panelName) {
+        if (panelName !== 'timeline') return true;
+        return autosave.isConnected() && state.activeView === 'project' && Boolean(this.getActiveProject());
+      },
+
+      openMobilePanel(panelName) {
+        const panelSettings = this.mobilePanelSettings[panelName];
+        if (!panelSettings || !this.isMobileLayout() || !this.canOpenMobilePanel(panelName)) return;
+
+        Object.entries(this.mobilePanelSettings).forEach(([name, settings]) => {
+          document.body.classList.toggle(settings.bodyClass, name === panelName);
+        });
+
+        this.syncMobilePanelState();
+      },
+
+      closeMobilePanels() {
+        Object.values(this.mobilePanelSettings).forEach(settings => {
+          document.body.classList.remove(settings.bodyClass);
+        });
+
+        this.syncMobilePanelState();
+      },
+
+      syncMobilePanelState() {
+        const hasOpenPanel = Object.values(this.mobilePanelSettings).some(settings => {
+          return document.body.classList.contains(settings.bodyClass);
+        });
+
+        document.body.classList.toggle('is-mobile-panel-open', hasOpenPanel);
+
+        if (this.elements.mobileOverlay) {
+          this.elements.mobileOverlay.classList.toggle('is-visible', hasOpenPanel);
+          this.elements.mobileOverlay.setAttribute('aria-hidden', String(!hasOpenPanel));
+        }
+
+        Object.values(this.mobilePanelSettings).forEach(settings => {
+          const isOpen = document.body.classList.contains(settings.bodyClass);
+          const button = this.elements[settings.buttonKey];
+          const panel = this.elements[settings.panelKey];
+
+          if (button) button.setAttribute('aria-expanded', String(isOpen));
+          if (panel) panel.setAttribute('aria-hidden', String(this.isMobileLayout() && !isOpen));
+        });
+      },
+
+      updateMobileControls() {
+        const canShowTimeline = state.activeView === 'project' && Boolean(this.getActiveProject());
+        const canOpenTimeline = this.canOpenMobilePanel('timeline');
+
+        if (this.elements.mobileTimelineButton) {
+          this.elements.mobileTimelineButton.disabled = !canOpenTimeline;
+          this.elements.mobileTimelineButton.classList.toggle('is-hidden', !canShowTimeline);
+          this.elements.mobileTimelineButton.setAttribute('aria-label', canOpenTimeline ? 'Verlauf öffnen' : 'Kein Verlauf verfügbar');
+          this.elements.mobileTimelineButton.title = canOpenTimeline ? 'Verlauf öffnen' : 'Kein Verlauf verfügbar';
+        }
+
+        if (!canOpenTimeline && document.body.classList.contains(this.mobilePanelSettings.timeline.bodyClass)) {
+          this.closeMobilePanels();
+        } else {
+          this.syncMobilePanelState();
+        }
+      },
+
+      setupMobileSwipeListeners() {
+        const swipeConfig = {
+          edgeWidth: 32,
+          minDistance: 68,
+          horizontalRatio: 1.35
+        };
+
+        document.addEventListener('touchstart', event => {
+          if (!this.isMobileLayout() || event.touches.length !== 1 || this.isTextInput(event.target)) return;
+
+          const touch = event.touches[0];
+          this.mobileSwipeStart = {
+            x: touch.clientX,
+            y: touch.clientY
+          };
+        }, { passive: true });
+
+        document.addEventListener('touchend', event => {
+          if (!this.mobileSwipeStart || !this.isMobileLayout() || !event.changedTouches.length) {
+            this.mobileSwipeStart = null;
+            return;
+          }
+
+          const touch = event.changedTouches[0];
+          const deltaX = touch.clientX - this.mobileSwipeStart.x;
+          const deltaY = touch.clientY - this.mobileSwipeStart.y;
+          const absoluteX = Math.abs(deltaX);
+          const absoluteY = Math.abs(deltaY);
+          const startX = this.mobileSwipeStart.x;
+          const viewportWidth = window.innerWidth;
+
+          this.mobileSwipeStart = null;
+
+          if (absoluteX < swipeConfig.minDistance || absoluteX < absoluteY * swipeConfig.horizontalRatio) return;
+
+          const panelActions = [
+            {
+              condition: document.body.classList.contains(this.mobilePanelSettings.sidebar.bodyClass) && deltaX < 0,
+              action: () => this.closeMobilePanels()
+            },
+            {
+              condition: document.body.classList.contains(this.mobilePanelSettings.timeline.bodyClass) && deltaX > 0,
+              action: () => this.closeMobilePanels()
+            },
+            {
+              condition: startX <= swipeConfig.edgeWidth && deltaX > 0,
+              action: () => this.openMobilePanel('sidebar')
+            },
+            {
+              condition: startX >= viewportWidth - swipeConfig.edgeWidth && deltaX < 0,
+              action: () => this.openMobilePanel('timeline')
+            }
+          ];
+
+          panelActions.find(item => item.condition)?.action();
+        }, { passive: true });
+      },
+
       setAutosaveStatus(status, label) {
         const button = this.elements.connectAutosaveButton;
         if (!button) return;
@@ -3511,7 +3929,8 @@
           { element: this.elements.openTaskModalButton, disabled: !isConnected || !hasProject },
           { element: this.elements.openJournalModalButton, disabled: !isConnected || !hasProject },
           { element: this.elements.editProjectButton, disabled: !isConnected || !hasProject },
-          { element: this.elements.deleteProjectButton, disabled: !isConnected || !hasProject }
+          { element: this.elements.deleteProjectButton, disabled: !isConnected || !hasProject },
+          { element: this.elements.mobileTimelineButton, disabled: !isConnected || !hasProject || state.activeView !== 'project' }
         ];
 
         controls.forEach(({ element, disabled }) => {
@@ -3519,6 +3938,7 @@
         });
 
         this.setTimelineGroupSwitchDisabled(!isConnected || !hasProject);
+        this.updateMobileControls();
       },
 
       openConfirmModal({ type, name = '', onConfirm }) {
@@ -3945,6 +4365,7 @@
         this.renderActiveView();
         this.updateHistoryButtons();
         this.updateDataControls();
+        this.updateMobileControls();
       },
 
       renderMetrics() {
@@ -6228,6 +6649,7 @@
 
         state.activeView = 'dashboard';
         ui.render();
+        ui.closeMobilePanels();
       },
 
       setActiveProject(projectId) {
@@ -6237,6 +6659,7 @@
         state.activeProjectId = projectId;
         state.activeView = 'project';
         ui.render();
+        ui.closeMobilePanels();
       },
 
       reorderDashboardProjects(sourceProjectId, targetProjectId) {
