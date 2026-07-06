@@ -4,173 +4,207 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Projekt-Manager</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #f5f6f8;
+    }
+
+    #appFrame {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      background: #f5f6f8;
+    }
+
+    #fallbackMessage {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 24px;
+      color: #182018;
+    }
+  </style>
 </head>
 <body>
-  <noscript>Für den Projekt-Manager muss JavaScript aktiviert sein.</noscript>
+  <noscript>
+    <main id="fallbackMessage">
+      <h1>Projekt-Manager</h1>
+      <p>Für den Projekt-Manager muss JavaScript aktiviert sein.</p>
+    </main>
+  </noscript>
+
+  <iframe id="appFrame" src="app-core.html" title="Projekt-Manager"></iframe>
+
   <script>
-    (async () => {
+    const frame = document.getElementById('appFrame');
+
+    const injectAreaRenamePatch = () => {
       try {
-        const response = await fetch('app-core.html', { cache: 'no-store' });
-        if (!response.ok) throw new Error('app-core.html konnte nicht geladen werden (' + response.status + ')');
+        const targetWindow = frame.contentWindow;
+        if (!targetWindow) return;
 
-        const html = await response.text();
-        const patchScript = `<script>
-          (() => {
-            const runAreaRenamePatch = () => {
-              if (typeof ui === 'undefined' || typeof app === 'undefined' || typeof utils === 'undefined' || typeof state === 'undefined') return;
+        const patchSource = '(' + function () {
+          const runAreaRenamePatch = () => {
+            if (typeof ui === 'undefined' || typeof app === 'undefined' || typeof utils === 'undefined' || typeof state === 'undefined') return false;
 
-              if (typeof config !== 'undefined') {
-                config.version = 'v3.48.1';
-                if (ui.elements?.versionDisplay) ui.elements.versionDisplay.textContent = config.version;
+            if (typeof config !== 'undefined') {
+              config.version = 'v3.48.2';
+              if (ui.elements && ui.elements.versionDisplay) {
+                ui.elements.versionDisplay.textContent = config.version;
+              }
+            }
+
+            if (!document.getElementById('areaRenamePatchStyles')) {
+              const style = document.createElement('style');
+              style.id = 'areaRenamePatchStyles';
+              style.textContent = [
+                '.area-list-row {',
+                '  display: flex;',
+                '  align-items: stretch;',
+                '  gap: 8px;',
+                '}',
+                '.area-list-row .area-list-button {',
+                '  flex: 1 1 auto;',
+                '  min-width: 0;',
+                '}',
+                '.area-rename-button {',
+                '  width: 44px;',
+                '  min-width: 44px;',
+                '  min-height: 44px;',
+                '  border-radius: 14px;',
+                '  padding: 0;',
+                '}',
+                '.area-rename-button svg {',
+                '  width: 18px;',
+                '  height: 18px;',
+                '}'
+              ].join('\n');
+              document.head.appendChild(style);
+            }
+
+            app.renameArea = function renameArea(areaId, name) {
+              if (!this.ensureAutosaveConnected()) return false;
+
+              const nextName = utils.normalizeAreaName(name, '');
+              if (!areaId || !nextName) return false;
+
+              utils.syncActiveAreaFromState();
+              state.areas = utils.normalizeAreas(state.areas);
+
+              const area = state.areas.find(item => item.id === areaId);
+              if (!area || area.name === nextName) return false;
+
+              this.recordChange();
+              area.name = nextName;
+
+              if (state.activeAreaId === area.id) {
+                state.appSubtitle = nextName;
               }
 
-              if (!document.getElementById('areaRenamePatchStyles')) {
-                const style = document.createElement('style');
-                style.id = 'areaRenamePatchStyles';
-                style.textContent = [
-                  '.area-list-row {',
-                  '  display: flex;',
-                  '  align-items: stretch;',
-                  '  gap: 8px;',
-                  '}',
-                  '.area-list-row .area-list-button {',
-                  '  flex: 1 1 auto;',
-                  '  min-width: 0;',
-                  '}',
-                  '.area-rename-button {',
-                  '  width: 44px;',
-                  '  min-width: 44px;',
-                  '  min-height: 44px;',
-                  '  border-radius: 14px;',
-                  '  padding: 0;',
-                  '}',
-                  '.area-rename-button svg {',
-                  '  width: 18px;',
-                  '  height: 18px;',
-                  '}'
-                ].join('\n');
-                document.head.appendChild(style);
-              }
-
-              app.renameArea = function renameArea(areaId, name) {
-                if (!this.ensureAutosaveConnected()) return false;
-
-                const nextName = utils.normalizeAreaName(name, '');
-                if (!areaId || !nextName) return false;
-
-                utils.syncActiveAreaFromState();
-                state.areas = utils.normalizeAreas(state.areas);
-
-                const area = state.areas.find(item => item.id === areaId);
-                if (!area || area.name === nextName) return false;
-
-                this.recordChange();
-                area.name = nextName;
-
-                if (state.activeAreaId === area.id) {
-                  state.appSubtitle = nextName;
-                }
-
-                this.updateAndRender();
-                return true;
-              };
-
-              ui.renderAreaList = function renderAreaList() {
-                const list = this.elements.areaList;
-                if (!list) return;
-
-                utils.syncActiveAreaFromState();
-                state.areas = utils.normalizeAreas(state.areas);
-                list.innerHTML = '';
-
-                state.areas.forEach(area => {
-                  const theme = utils.getTheme(area.theme);
-                  const isActive = area.id === state.activeAreaId;
-
-                  const row = document.createElement('div');
-                  row.className = 'area-list-row';
-
-                  const button = document.createElement('button');
-                  button.type = 'button';
-                  button.className = 'area-list-button' + (isActive ? ' is-active' : '');
-                  button.dataset.action = 'select-area';
-                  button.dataset.areaId = area.id;
-                  button.disabled = isActive;
-                  button.setAttribute('aria-current', isActive ? 'true' : 'false');
-
-                  const name = document.createElement('span');
-                  name.className = 'area-list-name';
-                  name.textContent = area.name;
-                  name.title = area.name;
-
-                  const themeWrap = document.createElement('span');
-                  themeWrap.className = 'area-list-theme';
-
-                  const swatch = document.createElement('span');
-                  swatch.className = 'theme-option-swatch';
-                  swatch.style.background = 'linear-gradient(135deg, ' + theme.variables['--logo-gradient-start'] + ' 0%, ' + theme.variables['--logo-gradient-end'] + ' 100%)';
-
-                  const themeName = document.createElement('span');
-                  themeName.textContent = theme.label;
-
-                  themeWrap.append(swatch, themeName);
-                  button.append(name, themeWrap);
-
-                  const renameButton = utils.createIconButton({
-                    action: 'rename-area',
-                    data: { areaId: area.id },
-                    label: 'Bereich umbenennen',
-                    styleClass: 'button-secondary area-rename-button',
-                    iconName: 'pencil'
-                  });
-
-                  row.append(button, renameButton);
-                  list.appendChild(row);
-                });
-              };
-
-              if (ui.elements?.areaList && !ui.elements.areaList.dataset.renameListenerAttached) {
-                ui.elements.areaList.dataset.renameListenerAttached = 'true';
-                ui.elements.areaList.addEventListener('click', event => {
-                  const renameButton = event.target.closest('[data-action="rename-area"]');
-                  if (!renameButton) return;
-
-                  event.preventDefault();
-                  event.stopPropagation();
-
-                  utils.syncActiveAreaFromState();
-                  state.areas = utils.normalizeAreas(state.areas);
-
-                  const area = state.areas.find(item => item.id === renameButton.dataset.areaId);
-                  if (!area) return;
-
-                  const nextName = window.prompt('Bereich umbenennen', area.name);
-                  if (nextName === null) return;
-
-                  app.renameArea(area.id, nextName);
-                });
-              }
-
-              ui.renderAreaList();
-              ui.renderAppTitle();
+              this.updateAndRender();
+              return true;
             };
 
-            runAreaRenamePatch();
-          })();
-        <\/script>`;
+            ui.renderAreaList = function renderAreaList() {
+              const list = this.elements.areaList;
+              if (!list) return;
 
-        const patchedHtml = html.includes('</body>')
-          ? html.replace('</body>', patchScript + '</body>')
-          : html + patchScript;
+              utils.syncActiveAreaFromState();
+              state.areas = utils.normalizeAreas(state.areas);
+              list.innerHTML = '';
 
-        document.open();
-        document.write(patchedHtml);
-        document.close();
+              state.areas.forEach(area => {
+                const theme = utils.getTheme(area.theme);
+                const isActive = area.id === state.activeAreaId;
+
+                const row = document.createElement('div');
+                row.className = 'area-list-row';
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'area-list-button' + (isActive ? ' is-active' : '');
+                button.dataset.action = 'select-area';
+                button.dataset.areaId = area.id;
+                button.disabled = isActive;
+                button.setAttribute('aria-current', isActive ? 'true' : 'false');
+
+                const name = document.createElement('span');
+                name.className = 'area-list-name';
+                name.textContent = area.name;
+                name.title = area.name;
+
+                const themeWrap = document.createElement('span');
+                themeWrap.className = 'area-list-theme';
+
+                const swatch = document.createElement('span');
+                swatch.className = 'theme-option-swatch';
+                swatch.style.background = 'linear-gradient(135deg, ' + theme.variables['--logo-gradient-start'] + ' 0%, ' + theme.variables['--logo-gradient-end'] + ' 100%)';
+
+                const themeName = document.createElement('span');
+                themeName.textContent = theme.label;
+
+                themeWrap.append(swatch, themeName);
+                button.append(name, themeWrap);
+
+                const renameButton = utils.createIconButton({
+                  action: 'rename-area',
+                  data: { areaId: area.id },
+                  label: 'Bereich umbenennen',
+                  styleClass: 'button-secondary area-rename-button',
+                  iconName: 'pencil'
+                });
+
+                row.append(button, renameButton);
+                list.appendChild(row);
+              });
+            };
+
+            if (ui.elements && ui.elements.areaList && !ui.elements.areaList.dataset.renameListenerAttached) {
+              ui.elements.areaList.dataset.renameListenerAttached = 'true';
+              ui.elements.areaList.addEventListener('click', event => {
+                const renameButton = event.target.closest('[data-action="rename-area"]');
+                if (!renameButton) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                utils.syncActiveAreaFromState();
+                state.areas = utils.normalizeAreas(state.areas);
+
+                const area = state.areas.find(item => item.id === renameButton.dataset.areaId);
+                if (!area) return;
+
+                const nextName = window.prompt('Bereich umbenennen', area.name);
+                if (nextName === null) return;
+
+                app.renameArea(area.id, nextName);
+              });
+            }
+
+            ui.renderAreaList();
+            ui.renderAppTitle();
+            return true;
+          };
+
+          if (!runAreaRenamePatch()) {
+            window.setTimeout(runAreaRenamePatch, 100);
+            window.setTimeout(runAreaRenamePatch, 500);
+          }
+        }.toString() + ')();';
+
+        targetWindow.eval(patchSource);
       } catch (error) {
-        document.body.innerHTML = '<main style="font-family: system-ui, sans-serif; padding: 24px;"><h1>Projekt-Manager konnte nicht geladen werden</h1><p>Die App-Datei app-core.html wurde nicht gefunden oder konnte nicht gelesen werden.</p></main>';
-        console.error(error);
+        console.error('Bereich-Umbenennen konnte nicht aktiviert werden:', error);
       }
-    })();
+    };
+
+    frame.addEventListener('load', injectAreaRenamePatch);
   </script>
 </body>
 </html>
