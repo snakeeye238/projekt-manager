@@ -1,17 +1,16 @@
 {
   "name": "projekt-manager-cloud",
-  "version": "3.48.3",
+  "version": "3.48.4",
   "private": true,
   "packageManager": "pnpm@11.7.0",
   "scripts": {
-    "build": "tailwindcss -c tailwind.config.cjs -i src/tailwind.css -o dist/tailwind.css --minify",
+    "build": "node scripts/sync-html.mjs",
     "dev": "wrangler pages dev dist",
     "deploy": "wrangler pages deploy dist --project-name projekt-manager",
     "db:migrate:local": "wrangler d1 migrations apply projekt-manager-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply projekt-manager-db --remote"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.17",
     "wrangler": "^4.0.0"
   }
 }
